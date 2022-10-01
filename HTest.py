@@ -66,10 +66,18 @@ def PixelXYToLatLong(pixelX, pixelY, levelOfDetail):
 #------------------
 
 #------ Tehran Azadi
-latCorner_TL = 35.970178
-longCorner_TL = 51.019000000000005
-latCorner_BR = 35.42929
-longCorner_BR = 51.656824
+#latCenter = 35.699734
+#longCenter = 51.337912
+#Resolution = 16000
+#>>LatLong TL : 35.97804090977126 50.99458694458008
+#>>LatLong BR : 35.42042651838322 51.68123245239258
+#------------------
+
+#------ Lowshan
+latCenter = 35.699734
+longCenter = 51.337912
+Resolution = 16000
+
 #------------------
 
 #API parameters
@@ -77,14 +85,19 @@ apiKey = "aTrzS6yVWcHMaimAczjk6IVrX3iobhyc"
 area = "Delta25"
 MapZoom = 15   #  mode1:15   mode2:17
 distanceDiffkm = 7.4   #  mode1:7.4   mode2:1.8
-wSize = 1000             #  mode1:1850   mode2:1950
-hSize = 1000
+wSize = 1500             #  mode1:1850   mode2:1950
+hSize = 1500
 getType = 'sat'   #sat-hyb-map
 edgeHalfLen = 30    #Half len of edge in kilometer
 secNum = 9
 zone = 39
-
 wSizeOrg = wSize
+
+XCenter, YCenter = LatLongToPixelXY(latCenter, longCenter, MapZoom)
+latCorner_TL , longCorner_TL = PixelXYToLatLong((XCenter - Resolution/2), (YCenter - Resolution/2) , MapZoom)
+latCorner_BR , longCorner_BR = PixelXYToLatLong((XCenter + Resolution/2), (YCenter + Resolution/2) , MapZoom)
+print ("LatLong TL :", latCorner_TL , longCorner_TL)
+print ("LatLong BR :", latCorner_BR , longCorner_BR)
 
 latlong = [0.1,0.1]
 XCorner_TL, YCorner_TL =LatLongToPixelXY(latCorner_TL, longCorner_TL, MapZoom)

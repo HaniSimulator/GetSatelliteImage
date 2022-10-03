@@ -4,6 +4,7 @@ import utm
 import numpy as np
 import math
 import time
+import os
 from PIL import Image
 
 ############################################################################################
@@ -59,35 +60,56 @@ def PixelXYToLatLong(pixelX, pixelY, levelOfDetail):
 #longCorner_BR= 51.116824
 
 #------ Delta 25
-#latCorner_TL = 32.170443999999996
-#longCorner_TL = 54.641088
-#latCorner_BR = 31.629555999999997
-#longCorner_BR= 55.278912
+#latCenter = 31.9
+#longCenter = 54.96
+#Resolution = 16000
+#MapZoom = 15   #  mode1:15   mode2:17
+#area = "Delta25"
+#getType = 'map'   #sat-hyb-map
+#>>LatLong TL : 32.19101272231434 54.616684913635254
+#>>LatLong BR : 31.60807169015679 55.303330421447754
 #------------------
 
 #------ Tehran Azadi
 #latCenter = 35.699734
 #longCenter = 51.337912
 #Resolution = 16000
+#MapZoom = 17   #  mode1:15   mode2:17
+#area = "Tehran_Azadi"
+#getType = 'sat'   #sat-hyb-map
 #>>LatLong TL : 35.97804090977126 50.99458694458008
 #>>LatLong BR : 35.42042651838322 51.68123245239258
 #------------------
 
 #------ Lowshan
-latCenter = 35.699734
-longCenter = 51.337912
+latCenter = 36.66667
+longCenter = 49.5
 Resolution = 16000
-
+area = "Lowshan"
+MapZoom = 15   #  mode1:15   mode2:17
+getType = 'sat'   #sat-hyb-map
+#15 zoom
+#>>LatLong TL : 36.941557331985436 49.156694412231445
+#>>LatLong BR : 36.39078396650731 49.843339920043945
+#17 zoom
+#>>LatLong TL : 36.73548793168048 49.414165019989014
+#>>LatLong BR : 36.59779438415188 49.58582639694214
 #------------------
 
+
+
+####################################################################################
 #API parameters
+## sia
 apiKey = "aTrzS6yVWcHMaimAczjk6IVrX3iobhyc"
-area = "Delta25"
-MapZoom = 15   #  mode1:15   mode2:17
+## hani
+#apiKey = "4XrDOHmLY57IESC0rmP3NGYZLaxbOSXE"
+
+####################################################################################
+
 distanceDiffkm = 7.4   #  mode1:7.4   mode2:1.8
 wSize = 1500             #  mode1:1850   mode2:1950
 hSize = 1500
-getType = 'sat'   #sat-hyb-map
 edgeHalfLen = 30    #Half len of edge in kilometer
 secNum = 9
 zone = 39
@@ -96,8 +118,26 @@ wSizeOrg = wSize
 XCenter, YCenter = LatLongToPixelXY(latCenter, longCenter, MapZoom)
 latCorner_TL , longCorner_TL = PixelXYToLatLong((XCenter - Resolution/2), (YCenter - Resolution/2) , MapZoom)
 latCorner_BR , longCorner_BR = PixelXYToLatLong((XCenter + Resolution/2), (YCenter + Resolution/2) , MapZoom)
+latCorner_TR , longCorner_TR = PixelXYToLatLong((XCenter + Resolution/2), (YCenter - Resolution/2) , MapZoom)
+latCorner_BL , longCorner_BL = PixelXYToLatLong((XCenter - Resolution/2), (YCenter + Resolution/2) , MapZoom)
 print ("LatLong TL :", latCorner_TL , longCorner_TL)
 print ("LatLong BR :", latCorner_BR , longCorner_BR)
+#print ("LatLong TR :", latCorner_TR , longCorner_TR )
+#print ("LatLong BL :", latCorner_BL , longCorner_BL)
+
+lat1 = (latCorner_TL / 180) * math.pi
+lon1 = (longCorner_TL / 180) * math.pi
+lat2 = (latCorner_TL / 180) * math.pi
+lon2 = (longCorner_BR / 180) * math.pi
+distkm = math.acos(math.sin(lat1)*math.sin(lat2)+math.cos(lat1)*math.cos(lat2)*math.cos(lon2-lon1))*6371
+print("Top Line Distance :", distkm)
+lat1 = (latCorner_BR / 180) * math.pi
+lon1 = (longCorner_TL / 180) * math.pi
+lat2 = (latCorner_BR / 180) * math.pi
+lon2 = (longCorner_BR / 180) * math.pi
+distkm = math.acos(math.sin(lat1)*math.sin(lat2)+math.cos(lat1)*math.cos(lat2)*math.cos(lon2-lon1))*6371
+print("Botton Line Distance :", distkm)
+
 
 latlong = [0.1,0.1]
 XCorner_TL, YCorner_TL =LatLongToPixelXY(latCorner_TL, longCorner_TL, MapZoom)
@@ -150,7 +190,7 @@ while (YImageCap <= YCorner_BR):
                 latlong[1]) + "&size=" + str(wSize) + "%2C" + str(hSize + 24) + "&type=" + getType + "&zoom=" + str(
                 MapZoom) + "&imagetype=png&scalebar=false&key=" + apiKey
             print(address)
-            name = area + '_' + getType + '_' + 'Y_' +  str(yc) + '_' + 'X_' +  str(xc) + "_Lat_" + str(latlong[0]) + "_Long_" + str(latlong[1])
+            name = area + '_' + str(MapZoom) + '_' + getType + '_' + 'Y_' +  str(yc) + '_' + 'X_' +  str(xc) + "_Lat_" + str(latlong[0]) + "_Long_" + str(latlong[1])
             print(name)
             # Method1
             urllib.request.urlretrieve(address, name + '.png')
@@ -160,9 +200,13 @@ while (YImageCap <= YCorner_BR):
             #im1.show(name)
             #im1.crop(0, 0,  im1.size[0]-1, im1.size[1]-24-1)
             dstImage.paste(im1, (XImageCap-wSize-XCorner_TL,  YImageCap-hSize-YCorner_TL))
+
+            if os.path.exists(name + '.png'):
+                os.remove(name + '.png')
+
             xc = xc + 1
-        except:
-            print('Error along get :' + area + '_' + 'Y_' + str(yc) + '_' + 'X_' + str(xc))
+        except ValueError:
+            print('Error along get :[' + ValueError + ']'+ area + '_' + 'Y_' + str(yc) + '_' + 'X_' + str(xc))
 
     if( YImageCap == YCorner_BR):
         break
@@ -173,4 +217,4 @@ while (YImageCap <= YCorner_BR):
     xc = 0
     wSize = wSizeOrg
 
-dstImage.save("XXXX.png")
+dstImage.save(area+ '_'+ getType + '_' + str(MapZoom)+ '_X.png')

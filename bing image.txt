@@ -1,0 +1,8 @@
+https://staticmapmaker.com/bing/
+AkCO1a_K8I6zCt9sNPAyHaTVg-AmYZRFwa1V21hOl62nMjfJsDbjjmeiI2Cn29ko
+AmYZRFwa1V21hOl62nMjfJsDbjjmeiI2Cn29ko
+
+https://dev.virtualearth.net/REST/V1/Imagery/Map/Aerial/36.8%2C49.3/18?mapSize=8000%2C8000&format=png&pushpin=42.6564%2C-73.7638%3B64%3BHi&key=AkCO1a_K8I6zCt9sNPAyHaTVg-AmYZRFwa1V21hOl62nMjfJsDbjjmeiI2Cn29ko
+
+MapQuest api key:
+aTrzS6yVWcHMaimAczjk6IVrX3iobhyc

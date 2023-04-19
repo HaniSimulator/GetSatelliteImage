@@ -82,12 +82,12 @@ def PixelXYToLatLong(pixelX, pixelY, levelOfDetail):
 #------------------
 
 #------ Lowshan
-latCenter = 36.66667
-longCenter = 49.5
-Resolution = 16000
-area = "Lowshan"
-MapZoom = 15   #  mode1:15   mode2:17
-getType = 'sat'   #sat-hyb-map
+#latCenter = 36.66667
+#longCenter = 49.5
+#Resolution = 16000
+#area = "Lowshan"
+#MapZoom = 15   #  mode1:15   mode2:17
+#getType = 'sat'   #sat-hyb-map
 #15 zoom
 #>>LatLong TL : 36.941557331985436 49.156694412231445
 #>>LatLong BR : 36.39078396650731 49.843339920043945
@@ -96,7 +96,66 @@ getType = 'sat'   #sat-hyb-map
 #>>LatLong BR : 36.59779438415188 49.58582639694214
 #------------------
 
+#------ Alghadir yazd
+#latCenter = 31.74862
+#longCenter = 54.381923
+#Resolution = 16000
+#area = "Alghadir"
+#MapZoom = 15   #  mode1:15   mode2:17
+#getType = 'sat'   #sat-hyb-map
+#15 zoom
+#>>LatLong TL : 32.0400945059217 54.038615226745605
+#>>LatLong BR : 31.456196738293727 54.725260734558105
+#17 zoom
+#>>LatLong TL : 31.82158274738066 54.29609656333923
+#>>LatLong BR : 31.675607968788633 54.46775794029236
+#------------------
 
+#------ Alghadir yazd
+#latCenter = 31.74862
+#longCenter = 54.381923
+#Resolution = 16000
+#area = "Alghadir"
+#MapZoom = 15   #  mode1:15   mode2:17
+#getType = 'sat'   #sat-hyb-map
+#15 zoom
+#>>LatLong TL : 32.0400945059217 54.038615226745605
+#>>LatLong BR : 31.456196738293727 54.725260734558105
+#17 zoom
+#>>LatLong TL : 31.82158274738066 54.29609656333923
+#>>LatLong BR : 31.675607968788633 54.46775794029236
+#------------------
+
+#------ kedenj
+#latCenter = 29.42
+#longCenter = 52.405
+#Resolution = 8000
+#area = "Kedenj"
+#MapZoom = 18   #  mode1:15   mode2:17
+#getType = 'sat'   #sat-hyb-map
+#15 zoom
+#>>LatLong TL : 32.0400945059217 54.038615226745605
+#>>LatLong BR : 31.456196738293727 54.725260734558105
+#17 zoom
+#>>LatLong TL : 31.82158274738066 54.29609656333923
+#>>LatLong BR : 31.675607968788633 54.46775794029236
+#------------------
+
+
+#------ kedenj
+latCenter = 29.17
+longCenter = 52.5
+Resolution = 16000
+area = "Kedenj"
+MapZoom = 18   #  mode1:15   mode2:17
+getType = 'sat'   #sat-hyb-map
+#15 zoom
+#>>LatLong TL : 30.928991496743947 48.64089488983154
+#>>LatLong BR : 30.338176282978083 49.32754039764404
+#17 zoom
+#>>LatLong TL : 30.70785878439814 48.89836549758911
+#>>LatLong BR : 30.560154582611865 49.070026874542236
+#------------------
 
 ####################################################################################
 #API parameters
@@ -107,7 +166,7 @@ apiKey = "aTrzS6yVWcHMaimAczjk6IVrX3iobhyc"
 
 ####################################################################################
 
-distanceDiffkm = 7.4   #  mode1:7.4   mode2:1.8
+distanceDiffkm = 14.8   #  mode1:7.4   mode2:1.8  Mode3 = 14.8
 wSize = 1500             #  mode1:1850   mode2:1950
 hSize = 1500
 edgeHalfLen = 30    #Half len of edge in kilometer
@@ -161,6 +220,9 @@ while (YImageCap <= YCorner_BR):
         try:
             YImageCap = YImageCap_Row
 
+            XImageCap_Pr = XImageCap
+            YImageCap_Pr = YImageCap
+
             XcenIm = XImageCap + (wSize / 2)
             YcenIm = YImageCap + (hSize / 2)
 
@@ -186,14 +248,31 @@ while (YImageCap <= YCorner_BR):
 
             latlong = [Latcen, LongCen]
             # print("latlong: ", latlong)
-            address = "https://www.mapquestapi.com/staticmap/v4/getplacemap?location=" + str(latlong[0]) + "%2C" + str(
+
+            # Version4
+            # address = "https://www.mapquestapi.com/staticmap/v4/getplacemap?location=" + str(latlong[0]) + "%2C" + str(
+            #     latlong[1]) + "&size=" + str(wSize) + "%2C" + str(hSize + 24) + "&type=" + getType + "&zoom=" + str(
+            #     MapZoom) + "&imagetype=png&scalebar=false&key=" + apiKey
+
+            # Version5
+            address = "https://www.mapquestapi.com/staticmap/v5/map?center=" + str(latlong[0]) + "%2C" + str(
                 latlong[1]) + "&size=" + str(wSize) + "%2C" + str(hSize + 24) + "&type=" + getType + "&zoom=" + str(
                 MapZoom) + "&imagetype=png&scalebar=false&key=" + apiKey
+
             print(address)
             name = area + '_' + str(MapZoom) + '_' + getType + '_' + 'Y_' +  str(yc) + '_' + 'X_' +  str(xc) + "_Lat_" + str(latlong[0]) + "_Long_" + str(latlong[1])
             print(name)
+
             # Method1
-            urllib.request.urlretrieve(address, name + '.png')
+            if not(os.path.exists(name + '.png')):
+                print('Try Getting File')
+                try:
+                    urllib.request.urlretrieve(address, name + '.png')
+                except urllib.request.CalledProcessError as e:
+                    print('Error *****************'+e)
+                    XImageCap = XImageCap_Pr
+                    YImageCap = YImageCap_Pr
+                    continue
 
             time.sleep(0.5)
             im1 = Image.open(name + '.png')
@@ -201,8 +280,8 @@ while (YImageCap <= YCorner_BR):
             #im1.crop(0, 0,  im1.size[0]-1, im1.size[1]-24-1)
             dstImage.paste(im1, (XImageCap-wSize-XCorner_TL,  YImageCap-hSize-YCorner_TL))
 
-            if os.path.exists(name + '.png'):
-                os.remove(name + '.png')
+            #if os.path.exists(name + '.png'):
+            #    os.remove(name + '.png')
 
             xc = xc + 1
         except ValueError:

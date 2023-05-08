@@ -6,3 +6,7 @@ https://dev.virtualearth.net/REST/V1/Imagery/Map/Aerial/36.8%2C49.3/18?mapSize=8
 
 MapQuest api key:
 aTrzS6yVWcHMaimAczjk6IVrX3iobhyc
+
+
+google api key 
+AIzaSyCwSHNSatObAVnneYvTrJqikqNlskyE_Pw

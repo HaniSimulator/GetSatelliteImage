@@ -151,12 +151,13 @@ def PixelXYToLatLong(pixelX, pixelY, levelOfDetail):
 
 
 
-#------ shahinshahr
+#------ ShahinShar
 latCenter = 33.227211
 longCenter = 51.262115
-Resolution = 96000
-area = "Karaj"
-MapZoom = 18   #  mode1:15   mode2:17
+Resolution = 96468
+
+area = "ShahinShar"
+MapZoom = 17   #  mode1:15   mode2:17
 getType = 'sat'   #sat-hyb-map
 #15 zoom
 #>>LatLong TL : 30.928991496743947 48.64089488983154
@@ -175,12 +176,9 @@ apiKey = "aTrzS6yVWcHMaimAczjk6IVrX3iobhyc"
 
 ####################################################################################
 
-distanceDiffkm = 14.8   #  mode1:7.4   mode2:1.8  Mode3 = 14.8
-wSize = 1500             #  mode1:1850   mode2:1950
-hSize = 1500
+wSize = 500             #  mode1:1850   mode2:1950
+hSize = 500
 edgeHalfLen = 30    #Half len of edge in kilometer
-secNum = 9
-zone = 39
 wSizeOrg = wSize
 
 XCenter, YCenter = LatLongToPixelXY(latCenter, longCenter, MapZoom)
@@ -188,10 +186,10 @@ latCorner_TL , longCorner_TL = PixelXYToLatLong((XCenter - Resolution/2), (YCent
 latCorner_BR , longCorner_BR = PixelXYToLatLong((XCenter + Resolution/2), (YCenter + Resolution/2) , MapZoom)
 latCorner_TR , longCorner_TR = PixelXYToLatLong((XCenter + Resolution/2), (YCenter - Resolution/2) , MapZoom)
 latCorner_BL , longCorner_BL = PixelXYToLatLong((XCenter - Resolution/2), (YCenter + Resolution/2) , MapZoom)
-print ("LatLong TL :", latCorner_TL , longCorner_TL)
-print ("LatLong BR :", latCorner_BR , longCorner_BR)
-#print ("LatLong TR :", latCorner_TR , longCorner_TR )
-#print ("LatLong BL :", latCorner_BL , longCorner_BL)
+print ("LatLong FULL TL :", latCorner_TL , longCorner_TL)
+print ("LatLong FULL BR :", latCorner_BR , longCorner_BR)
+print ("LatLong FULL TR :", latCorner_TR , longCorner_TR)
+print ("LatLong FULL BL :", latCorner_BL , longCorner_BL)
 
 lat1 = (latCorner_TL / 180) * math.pi
 lon1 = (longCorner_TL / 180) * math.pi
@@ -206,108 +204,123 @@ lon2 = (longCorner_BR / 180) * math.pi
 distkm = math.acos(math.sin(lat1)*math.sin(lat2)+math.cos(lat1)*math.cos(lat2)*math.cos(lon2-lon1))*6371
 print("Botton Line Distance :", distkm)
 
+exit()
 
 latlong = [0.1,0.1]
-XCorner_TL, YCorner_TL =LatLongToPixelXY(latCorner_TL, longCorner_TL, MapZoom)
-XCorner_BR, YCorner_BR =LatLongToPixelXY(latCorner_BR, longCorner_BR, MapZoom)
-print ("TL:", XCorner_TL, YCorner_TL)
-print ("BR:", XCorner_BR, YCorner_BR)
+XCorner_Full_TL, YCorner_Full_TL = LatLongToPixelXY(latCorner_TL, longCorner_TL, MapZoom)
+XCorner_Full_BR, YCorner_Full_BR = LatLongToPixelXY(latCorner_BR, longCorner_BR, MapZoom)
+print ("TL_FULL_pix:", XCorner_Full_TL, YCorner_Full_TL)
+print ("BR_FULL_pix:", XCorner_Full_BR, YCorner_Full_BR)
 
-XImageCap = XCorner_TL
-YImageCap = YCorner_TL
-YImageCap_Row = YImageCap
-yc = 0
-xc = 0
-XcenIm = 0
-YcenIm = 0
+TileNum = 6
+TileW = ((XCorner_Full_BR - XCorner_Full_TL) / TileNum)
+TileH = ((YCorner_Full_BR - YCorner_Full_TL) / TileNum)
+for iTile in range(0, TileNum):
+    for jTile in range(0, TileNum):
+        XCorner_TL = (int)(XCorner_Full_TL + (iTile * TileW))
+        XCorner_BR = (int)(XCorner_Full_TL +((iTile+1) * TileW))
+        YCorner_TL = (int)(YCorner_Full_TL + (jTile * TileH))
+        YCorner_BR = (int)(YCorner_Full_TL + ((jTile+1) * TileH))
+        print("Tile ", iTile, "," , jTile,  "TL_Tilepix:", XCorner_TL, YCorner_TL)
+        print("Tile ", iTile, "," , jTile,  "BR_Tilepix:", XCorner_BR, YCorner_BR)
 
-dstImage = Image.new('RGB', (XCorner_BR - XCorner_TL, YCorner_BR - YCorner_TL))
-print ("FinalImage:", dstImage.size)
+        XImageCap = XCorner_TL
+        YImageCap = YCorner_TL
+        YImageCap_Row = YImageCap
+        yc = 0
+        xc = 0
+        XcenIm = 0
+        YcenIm = 0
 
-while (YImageCap <= YCorner_BR):
-    while (XImageCap < XCorner_BR):
-        try:
-            YImageCap = YImageCap_Row
 
-            XImageCap_Pr = XImageCap
-            YImageCap_Pr = YImageCap
+        dstImage = Image.new('RGB', ((int)(XCorner_BR - XCorner_TL), (int)(YCorner_BR - YCorner_TL)))
 
-            XcenIm = XImageCap + (wSize / 2)
-            YcenIm = YImageCap + (hSize / 2)
+        print ("FinalImage Size:", dstImage.size)
 
-            XImageCap = XImageCap + wSize
-            print("X>>>>>" , XImageCap, XcenIm, YcenIm)
-            if(XImageCap > XCorner_BR):
-                print("X***********************")
-                diffX = XImageCap-XCorner_BR
-                XcenIm = XcenIm - (diffX/2)
-                wSize = wSize - diffX
-                XImageCap = XCorner_BR
-
-            YImageCap = YImageCap + hSize
-            print("Y>>>>>", YImageCap, XcenIm, YcenIm)
-            if (YImageCap > YCorner_BR):
-                print("Y***********************")
-                diffY = YImageCap - YCorner_BR
-                YcenIm = YcenIm - (diffY / 2)
-                hSize = hSize - diffY
-                YImageCap = YCorner_BR
-
-            Latcen, LongCen = PixelXYToLatLong(XcenIm, YcenIm, MapZoom)
-
-            latlong = [Latcen, LongCen]
-            # print("latlong: ", latlong)
-
-            # Version4
-            # address = "https://www.mapquestapi.com/staticmap/v4/getplacemap?location=" + str(latlong[0]) + "%2C" + str(
-            #     latlong[1]) + "&size=" + str(wSize) + "%2C" + str(hSize + 24) + "&type=" + getType + "&zoom=" + str(
-            #     MapZoom) + "&imagetype=png&scalebar=false&key=" + apiKey
-
-            # Version5
-            address = "https://www.mapquestapi.com/staticmap/v5/map?center=" + str(latlong[0]) + "%2C" + str(
-                latlong[1]) + "&size=" + str(wSize) + "%2C" + str(hSize + 24) + "&type=" + getType + "&zoom=" + str(
-                MapZoom) + "&imagetype=png&scalebar=false&key=" + apiKey
-
-            print(address)
-            name = area + '_' + str(MapZoom) + '_' + getType + '_' + 'Y_' +  str(yc) + '_' + 'X_' +  str(xc) + "_Lat_" + str(latlong[0]) + "_Long_" + str(latlong[1])
-            print(name)
-
-            # Method1
-            if not(os.path.exists(name + '.png')):
-                print('>>> !!Try Getting File')
+        while (YImageCap <= YCorner_BR):
+            while (XImageCap < XCorner_BR):
                 try:
-                    # urllib.request.urlretrieve(address, name + '.png')
-                    ssss = 0
-                except urllib.request.CalledProcessError as e:
-                    print('Error *****************'+e)
-                    XImageCap = XImageCap_Pr
-                    YImageCap = YImageCap_Pr
-                    continue
+                    YImageCap = YImageCap_Row
 
-                time.sleep(0.5)
-            else:
-                print('>>>>>>>>>>> file exist <<<<<<<<<<')
+                    XImageCap_Pr = XImageCap
+                    YImageCap_Pr = YImageCap
+
+                    XcenIm = XImageCap + (wSize / 2)
+                    YcenIm = YImageCap + (hSize / 2)
+
+                    XImageCap = XImageCap + wSize
+                    print("X>>>>>" , XImageCap, XcenIm, YcenIm)
+                    if(XImageCap > XCorner_BR):
+                        print("X***********************")
+                        diffX = XImageCap-XCorner_BR
+                        XcenIm = XcenIm - (diffX/2)
+                        wSize = wSize - diffX
+                        XImageCap = XCorner_BR
+
+                    YImageCap = YImageCap + hSize
+                    print("Y>>>>>", YImageCap, XcenIm, YcenIm)
+                    if (YImageCap > YCorner_BR):
+                        print("Y***********************")
+                        diffY = YImageCap - YCorner_BR
+                        YcenIm = YcenIm - (diffY / 2)
+                        hSize = hSize - diffY
+                        YImageCap = YCorner_BR
+
+                    Latcen, LongCen = PixelXYToLatLong(XcenIm, YcenIm, MapZoom)
+
+                    latlong = [Latcen, LongCen]
+                    # print("latlong: ", latlong)
+
+                    # Version4
+                    # address = "https://www.mapquestapi.com/staticmap/v4/getplacemap?location=" + str(latlong[0]) + "%2C" + str(
+                    #     latlong[1]) + "&size=" + str(wSize) + "%2C" + str(hSize + 24) + "&type=" + getType + "&zoom=" + str(
+                    #     MapZoom) + "&imagetype=png&scalebar=false&key=" + apiKey
+
+                    # Version5
+                    address = "https://www.mapquestapi.com/staticmap/v5/map?center=" + str(latlong[0]) + "%2C" + str(
+                        latlong[1]) + "&size=" + str(wSize) + "%2C" + str(hSize + 24) + "&type=" + getType + "&zoom=" + str(
+                        MapZoom) + "&imagetype=png&scalebar=false&key=" + apiKey
+
+                    print(address)
+                    name = area + '_' + str(MapZoom) + '_' + getType + '_' + 'Y_' +  str(yc) + '_' + 'X_' +  str(xc) + "_Lat_" + str(latlong[0]) + "_Long_" + str(latlong[1])
+                    print(name)
+
+                    # Method1
+                    if not(os.path.exists(name + '.png')):
+                        print('>>> !!Try Getting File')
+                        try:
+                            urllib.request.urlretrieve(address, name + '.png')
+
+                        except urllib.request.CalledProcessError as e:
+                            print('Error *****************'+e)
+                            XImageCap = XImageCap_Pr
+                            YImageCap = YImageCap_Pr
+                            continue
+
+                        time.sleep(0.5)
+                    else:
+                        print('>>>>>>>>>>> file exist <<<<<<<<<<')
 
 
-            im1 = Image.open(name + '.png')
-            #im1.show(name)
-            #im1.crop(0, 0,  im1.size[0]-1, im1.size[1]-24-1)
-            dstImage.paste(im1, (XImageCap-wSize-XCorner_TL,  YImageCap-hSize-YCorner_TL))
+                    im1 = Image.open(name + '.png')
+                    #im1.show(name)
+                    #im1.crop(0, 0,  im1.size[0]-1, im1.size[1]-24-1)
+                    dstImage.paste(im1, ((int)(XImageCap-wSize-XCorner_TL),  (int)(YImageCap-hSize-YCorner_TL)))
 
-            #if os.path.exists(name + '.png'):
-            #    os.remove(name + '.png')
+                    #if os.path.exists(name + '.png'):
+                    #    os.remove(name + '.png')
 
-            xc = xc + 1
-        except ValueError:
-            print('Error along get :[' + ValueError + ']'+ area + '_' + 'Y_' + str(yc) + '_' + 'X_' + str(xc))
+                    xc = xc + 1
+                except ValueError:
+                    print('Error along get :[' + ValueError + ']'+ area + '_' + 'Y_' + str(yc) + '_' + 'X_' + str(xc))
 
-    if( YImageCap == YCorner_BR):
-        break
+            if( YImageCap == YCorner_BR):
+                break
 
-    XImageCap = XCorner_TL
-    YImageCap_Row = YImageCap
-    yc = yc + 1
-    xc = 0
-    wSize = wSizeOrg
+            XImageCap = XCorner_TL
+            YImageCap_Row = YImageCap
+            yc = yc + 1
+            xc = 0
+            wSize = wSizeOrg
 
-dstImage.save(area+ '_'+ getType + '_' + str(MapZoom)+ '_X.png')
+        dstImage.save(area+ '_'+ getType + '_Tile [' + iTile +'_'+jTile+ ']_'+ str(MapZoom)+ '_X.png')
